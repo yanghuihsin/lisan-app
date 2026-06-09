@@ -47,18 +47,17 @@ body{
   min-height:100vh;
   display:flex;
   justify-content:center;
+  align-items:flex-start;
   background:
     radial-gradient(circle at 20% 10%, rgba(184,92,59,0.08), transparent 40%),
     radial-gradient(circle at 80% 80%, rgba(61,91,58,0.08), transparent 40%),
     #e8dfc9;
 }
 
-/* === Phone frame === */
+/* === Phone frame (393 x 852) === */
 .phone{
-  width:100%;
-  max-width:432px;
-  height:100vh;
-  height:100dvh;
+  width:393px;
+  height:852px;
   background:var(--paper);
   position:relative;
   box-shadow:0 0 60px rgba(0,0,0,0.12);
@@ -444,12 +443,82 @@ body{
 .tab-bar .item svg{width:24px;height:24px;}
 .tab-bar .item span{font-size:8px;font-weight:600;letter-spacing:0;white-space:nowrap;line-height:1;}
 
+/* === Scan FAB (centre item, half-overlapping the tab-bar top edge) === */
+.tab-bar .item.fab{
+  flex:0 0 52px;            /* perfect circle width, not stretched */
+  opacity:1;               /* always full opacity, never the 0.5 dim */
+  justify-content:flex-start;
+  margin:0 8px;
+}
+.tab-bar .item.fab .fab-circle{
+  width:52px;height:52px;  /* diameter = 4×13, a multiple of 4 */
+  border-radius:50%;       /* mathematically round */
+  margin-top:-26px;        /* = radius → centre sits on the tab-bar top tangent */
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  color:#fff;
+  background:linear-gradient(140deg,#7ba05b 0%,#3d5b3a 100%);
+  box-shadow:0 6px 18px rgba(61,91,58,0.45);
+}
+.tab-bar .item.fab .fab-circle svg{width:24px;height:24px;}
+.tab-bar .item.fab .fab-circle .icon-close{display:none;}
+.tab-bar .item.fab.scanning .fab-circle .icon-scan{display:none;}
+.tab-bar .item.fab.scanning .fab-circle .icon-close{display:block;}
+.tab-bar .item.fab span{margin-top:8px;color:var(--ink-soft);}
+.tab-bar .item.fab.active span{color:var(--moss-dark);}
+.tab-bar .item.fab.active::before{display:none;} /* no top indicator line on the FAB */
+
+/* === Scanner screen (dark) === */
+#screen-scanner{background:#1a2417;}
+.scan-stage{
+  flex:1;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  gap:32px;
+  padding:24px;
+}
+.scan-frame{width:240px;height:240px;position:relative;}
+.scan-corner{position:absolute;width:32px;height:32px;border:4px solid var(--leaf-light);}
+.scan-corner.tl{top:0;left:0;border-right:none;border-bottom:none;border-radius:24px 0 0 0;}
+.scan-corner.tr{top:0;right:0;border-left:none;border-bottom:none;border-radius:0 24px 0 0;}
+.scan-corner.bl{bottom:0;left:0;border-right:none;border-top:none;border-radius:0 0 0 24px;}
+.scan-corner.br{bottom:0;right:0;border-left:none;border-top:none;border-radius:0 0 24px 0;}
+.scan-line{
+  position:absolute;left:8px;right:8px;top:8px;height:4px;
+  background:linear-gradient(90deg,transparent,var(--leaf-light),transparent);
+  box-shadow:0 0 16px var(--leaf-light);
+  animation:scanmove 2.4s ease-in-out infinite;
+}
+@keyframes scanmove{0%{top:8px;}50%{top:228px;}100%{top:8px;}}
+.scan-hint{color:rgba(255,255,255,0.8);text-align:center;font-size:14px;line-height:1.6;}
+
 /* === Detail page styles === */
 .detail-hero{
   position:relative;
   padding:88px 24px 32px;
   color:#fff;
   overflow:hidden;
+}
+/* 四季教案：將四個季節內頁的 hero（如春季）與各季節教案內頁的 hero
+   （如桐花大解密）統一為相同高度。值取這些 hero 中最高者（春・螢火蟲
+   = 364px），較矮的 hero 會撐高到一致，較長文字也不會被裁切。此規則
+   僅作用於這 12 個頁面，不影響其他使用 .detail-hero 的頁面（步道、ESG 等）。 */
+#screen-season-spring .detail-hero,
+#screen-season-summer .detail-hero,
+#screen-season-autumn .detail-hero,
+#screen-season-winter .detail-hero,
+#screen-spring-tung .detail-hero,
+#screen-spring-firefly .detail-hero,
+#screen-summer-tea .detail-hero,
+#screen-summer-mongoose .detail-hero,
+#screen-autumn-grass .detail-hero,
+#screen-autumn-bat .detail-hero,
+#screen-winter-radish .detail-hero,
+#screen-winter-pangolin .detail-hero{
+  min-height:364px;
 }
 .detail-hero .bg-pattern{
   position:absolute;
@@ -1395,8 +1464,8 @@ body{
 }
 
 /* ── Feat-card inline photo (right side, e.g. 賞花不留痕跡) ──
-   Width: card overall width = 432 (phone) − 2×20 (article padding) = 392px;
-   392 ÷ 3 ≈ 130.7 → rounded to 132px to stay a multiple of 4.
+   Width: card overall width = 393 (phone) − 2×20 (article padding) = 353px;
+   353 ÷ 3 ≈ 117.7 → rounded to 116px to stay a multiple of 4.
    Concentric radii rule: inner radius = outer radius − padding.
    Negative margin pulls the image 8px out of the card's 16px padding
    on top/right/bottom, so the gap to the card edge = 16 − 8 = 8px,
@@ -1411,8 +1480,8 @@ body{
   min-width:0;
 }
 .feat-photo--placeholder{
-  flex:0 0 132px;
-  width:132px;
+  flex:0 0 116px;
+  width:116px;
   min-height:96px;
   margin:-8px -8px -8px 0; /* edge gap: 16 − 8 = 8px */
   border-radius:8px; /* 16 − 8 = 8 */
@@ -1865,7 +1934,7 @@ body{
 .pdf-modal.active{display:flex;}
 .pdf-content{
   background:#fff;
-  width:100%;max-width:432px;
+  width:100%;max-width:393px;
   border-radius:24px 24px 0 0;
   padding:24px 20px 32px;
   max-height:80vh;
@@ -3877,11 +3946,11 @@ body{
             <div class="ftitle">💧 水文韌性</div>
             <p>茂密的次生林冠層如同綠色屋頂，能遮蔽陽光並減少水分蒸發；雨水在此被自然匯集至谷底，形成了 <b>全年穩定且不枯竭的湧泉環境</b>。</p>
           </div>
+          <div class="field-photo field-photo--placeholder"><span class="fp-wm">待提供正式圖片</span></div>
         </div>
 
         <div class="article-section">
           <h2 class="h2">雙重土系的「並肩守護」</h2>
-          <div class="field-photo field-photo--placeholder"><span class="fp-wm">待提供正式圖片</span></div>
           <p class="p">在龍潭地表之下，這片土地由兩種土層隨地形起伏共同構築了支撐里山生態的地基。由於此地長期受高溫多雨的濕潤氣候影響，土壤普遍呈現<strong>強酸性（pH 值約 4.09）</strong>，且鹽基飽和度極低，展現出強烈淋洗作用下的地質特徵：</p>
 
           <div class="stat-row">
@@ -6059,6 +6128,20 @@ body{
     </div>
   </div>
 
+  <!-- ============ SCANNER (掃描) ============ -->
+  <div class="screen" id="screen-scanner">
+    <div class="scan-stage">
+      <div class="scan-frame">
+        <span class="scan-corner tl"></span>
+        <span class="scan-corner tr"></span>
+        <span class="scan-corner bl"></span>
+        <span class="scan-corner br"></span>
+        <div class="scan-line"></div>
+      </div>
+      <div class="scan-hint">將解說牌上的 QR Code 對準框內<br>即可辨識物種與生態資訊</div>
+    </div>
+  </div>
+
   </div><!-- /screens-wrap -->
 
   <!-- ============ Me bottom sheet ============ -->
@@ -6204,6 +6287,12 @@ body{
     <div class="item" data-tab="tasks" onclick="switchTab('tasks')">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 20 L9 9 L13 15 L16 10 L21 20 Z"/></svg>
       <span>里山學堂</span>
+    </div>
+    <div class="item fab" data-tab="scanner" onclick="toggleScanner()">
+      <div class="fab-circle">
+        <svg class="icon-scan" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M3 7V5a2 2 0 012-2h2M21 7V5a2 2 0 00-2-2h-2M3 17v2a2 2 0 002 2h2M21 17v2a2 2 0 01-2 2h-2M7 12h10"/></svg>
+        <svg class="icon-close" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg>
+      </div>
     </div>
     <div class="item" data-tab="trail" onclick="switchTab('trail')">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M9 4l-5 16h6l2-7 3 5 5-14h-6l-2 5z"/></svg>
@@ -6507,21 +6596,24 @@ const PAGE_OWNER = {
   'trail-animal': 'trail',
   'trail-plant': 'trail',
   'trail-conserv': 'trail',
+  // scanner (掃描)
+  scanner: 'scanner',
 };
 
 const tabRoots = {
   home: 'home',
   tasks: 'tasks',
   trail: 'trail',
-  seasons: 'seasons'
+  seasons: 'seasons',
+  scanner: 'scanner'
 };
 
 // === Stack-based navigation per tab ===
-const tabStacks = {home:['home'], tasks:['tasks'], trail:['trail'], seasons:['seasons']};
+const tabStacks = {home:['home'], tasks:['tasks'], trail:['trail'], seasons:['seasons'], scanner:['scanner']};
 let currentTab = 'home';
 
 // Status-bar color depends on whether the screen leads with a dark hero
-const heroIsDark = id => /^(esg|trail-intro|trail-nature|trail-animal|trail-plant|trail-conserv|season-|spring-|summer-|autumn-|winter-|me|task-soil|task-bio|task-edu|tasks|trail|seasons)$/.test(id);
+const heroIsDark = id => /^(esg|trail-intro|trail-nature|trail-animal|trail-plant|trail-conserv|season-|spring-|summer-|autumn-|winter-|me|task-soil|task-bio|task-edu|tasks|trail|seasons|scanner)$/.test(id);
 
 function updateStatusBar(id){
   const sb = document.getElementById('statusBar');
@@ -6541,6 +6633,10 @@ function showScreen(id){
   document.querySelectorAll('.tab-bar .item').forEach(it=>{
     it.classList.toggle('active', it.dataset.tab===currentTab);
   });
+  // sync the scan FAB icon: show the close (X) icon while on the scanner,
+  // otherwise show the scan icon
+  document.querySelector('.tab-bar .item.fab')
+    ?.classList.toggle('scanning', currentTab==='scanner');
   // Slot-machine counter on the soil task page
   if(id === 'task-soil'){ runSoilCounter(); fitSoilFormula(); }
   // Slot-machine counter on the trail-plant page (295 / 51 / 9)
@@ -6745,6 +6841,14 @@ function switchTab(tab){
   currentTab = tab;
   tabStacks[tab] = [tabRoots[tab]];
   showScreen(tabRoots[tab]);
+}
+
+// Tapping the centre scan FAB: enter the scanner if we're not already on it,
+// otherwise close the scanner state and return to the home tab. The icon
+// (scan ⇄ close) is kept in sync centrally inside showScreen().
+function toggleScanner(){
+  if(currentTab === 'scanner') switchTab('home');
+  else switchTab('scanner');
 }
 
 // Back within current tab
