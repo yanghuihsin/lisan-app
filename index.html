@@ -65,6 +65,21 @@ body{
   display:flex;
   flex-direction:column;
 }
+/* On real devices the fixed 852px frame is taller than the viewport, so the
+   tab bar (pinned to the bottom of the frame) falls below the fold and only
+   shows after scrolling the whole page. Letting the phone fill the device
+   height keeps the tab bar fixed at the bottom. 100dvh adapts as the browser
+   chrome shows/hides; 100vh is the fallback for browsers without dvh.
+   Desktop keeps the 393×852 mockup. */
+@media (max-width:480px){
+  body{min-height:100dvh;}
+  .phone{
+    width:100%;
+    height:100vh;
+    height:100dvh;
+    box-shadow:none;
+  }
+}
 
 /* === Status bar === */
 .status-bar{
