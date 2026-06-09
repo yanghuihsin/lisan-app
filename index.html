@@ -444,55 +444,6 @@ body{
 .tab-bar .item svg{width:24px;height:24px;}
 .tab-bar .item span{font-size:8px;font-weight:600;letter-spacing:0;white-space:nowrap;line-height:1;}
 
-/* FAB — perfect circle 52×52, centered on tab-bar's top edge */
-.tab-bar .item.fab{
-  flex:0 0 64px;
-  margin:0 8px;
-  position:relative;
-  /* Override .item padding/gap; FAB content positions itself */
-  padding:0;
-  gap:0;
-  /* Anchor: align FAB column to the very top of tab-bar */
-  align-self:stretch;
-  justify-content:flex-start;
-  /* FAB is always fully opaque regardless of active/inactive state */
-  opacity:1;
-}
-.tab-bar .item.fab .fab-circle{
-  width:48px;
-  height:48px;
-  flex:0 0 48px;
-  background:linear-gradient(135deg, var(--leaf), var(--moss-dark));
-  border-radius:50%;
-  display:flex;align-items:center;justify-content:center;
-  box-shadow:0 8px 16px rgba(74,124,68,0.35);
-  /* Half above, half below the tab-bar's top border line */
-  margin-top:-24px;
-  margin-bottom:4px;
-}
-.tab-bar .item.fab .fab-circle svg{width:24px;height:24px;color:#fff;}
-.tab-bar .item.fab span{color:var(--moss-dark);opacity:0.7;}
-
-/* Toggle between scan and close icons based on active state.
-   Default (inactive scanner tab): show scanner icon.
-   Active (scanner open): show X icon. */
-.tab-bar .item.fab .fab-svg-close{display:none;}
-.tab-bar .item.fab.active .fab-svg-scan{display:none;}
-.tab-bar .item.fab.active .fab-svg-close{display:flex;}
-.tab-bar .item.fab::before{
-  /* Click-area extension: cover the upper half of the FAB that sits
-     above the tab-bar's native flex box.
-     Explicitly null background+width so the .item.active::before
-     styling (dark green bar) does not bleed through when FAB is active. */
-  content:'';
-  position:absolute;
-  top:-28px; left:-4px; right:-4px;
-  width:auto;
-  height:32px;
-  background:transparent;
-  z-index:1;
-}
-
 /* === Detail page styles === */
 .detail-hero{
   position:relative;
@@ -1352,6 +1303,25 @@ body{
   to{transform:translateX(-50%);}
 }
 
+/* Swipeable animal carousel — replaces ec-marquee, uses h-carousel scroll behavior */
+.ec-swipe{
+  display:flex;
+  gap:10px;
+  margin:16px -20px 0;
+  padding:4px 0 16px;
+  overflow-x:auto;
+  -webkit-overflow-scrolling:touch;
+  scrollbar-width:none;
+  scroll-snap-type:x mandatory;
+  scroll-padding-inline:20px;
+}
+.ec-swipe::-webkit-scrollbar{display:none;}
+.ec-swipe > .ec-card{
+  scroll-snap-align:start;
+}
+.ec-swipe > .ec-card:first-child{ margin-left:20px; }
+.ec-swipe > .ec-card:last-child{ margin-right:20px; }
+
 /* === Trail landing — continue exploration section === */
 .story-explore{
   padding:40px 20px 36px;
@@ -1375,6 +1345,152 @@ body{
   object-fit:cover;
 }
 .field-photo + .field-photo{margin-top:12px;}
+
+/* Placeholder variant — used when the formal photo is not yet provided.
+   Reuses .field-photo's geometry (aspect-ratio, radius, shadow). */
+.field-photo--placeholder{
+  background:
+    radial-gradient(circle at 28% 22%, rgba(168,197,133,0.32), transparent 55%),
+    radial-gradient(circle at 78% 78%, rgba(200,144,88,0.18), transparent 60%),
+    linear-gradient(135deg, #efe6d4 0%, #ddd0b2 100%);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+}
+.field-photo--placeholder::before{
+  content:'';
+  position:absolute;
+  inset:0;
+  background-image:
+    repeating-linear-gradient(45deg, transparent 0 18px, rgba(60,40,20,0.04) 18px 19px),
+    repeating-linear-gradient(-45deg, transparent 0 18px, rgba(60,40,20,0.04) 18px 19px);
+  pointer-events:none;
+}
+.field-photo--placeholder .fp-wm{
+  position:relative;
+  font-family:var(--serif);
+  font-size:13px;
+  letter-spacing:0.18em;
+  color:rgba(60,40,20,0.62);
+  background:rgba(255,255,255,0.72);
+  padding:8px 20px;
+  border-radius:999px;
+  border:1px solid rgba(60,40,20,0.12);
+}
+/* When a placeholder photo is immediately followed by a paragraph,
+   ensure the bottom gap mirrors the top gap (16px), since .p has no
+   default margin-top and .field-photo has margin-bottom:0. */
+.field-photo--placeholder + .p{
+  margin-top:16px;
+}
+/* Inner-card variant — placed inside a padded card (.quote etc.).
+   Concentric radii rule: inner radius = outer radius − padding.
+   Image breaks out 12px from card content area via negative margin on
+   top/left/right, so the visual gap from card outer edge becomes
+   20−12 = 8px on all three sides (equal top & sides). Inner radius
+   therefore = 16 − 8 = 8px. */
+.field-photo--inner{
+  margin:-12px -12px 14px;
+  border-radius:8px;
+}
+
+/* ── Feat-card inline photo (right side, e.g. 賞花不留痕跡) ──
+   Width: card overall width = 432 (phone) − 2×20 (article padding) = 392px;
+   392 ÷ 3 ≈ 130.7 → rounded to 132px to stay a multiple of 4.
+   Concentric radii rule: inner radius = outer radius − padding.
+   Negative margin pulls the image 8px out of the card's 16px padding
+   on top/right/bottom, so the gap to the card edge = 16 − 8 = 8px,
+   and inner radius = 16 − 8 = 8px. */
+.feat-flex{
+  display:flex;
+  gap:12px;
+  align-items:stretch;
+}
+.feat-flex .feat-body{
+  flex:1;
+  min-width:0;
+}
+.feat-photo--placeholder{
+  flex:0 0 132px;
+  width:132px;
+  min-height:96px;
+  margin:-8px -8px -8px 0; /* edge gap: 16 − 8 = 8px */
+  border-radius:8px; /* 16 − 8 = 8 */
+  overflow:hidden;
+  position:relative;
+  background:
+    radial-gradient(circle at 28% 22%, rgba(168,197,133,0.32), transparent 55%),
+    radial-gradient(circle at 78% 78%, rgba(200,144,88,0.18), transparent 60%),
+    linear-gradient(135deg, #efe6d4 0%, #ddd0b2 100%);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+}
+.feat-photo--placeholder::before{
+  content:'';
+  position:absolute;
+  inset:0;
+  background-image:
+    repeating-linear-gradient(45deg, transparent 0 18px, rgba(60,40,20,0.04) 18px 19px),
+    repeating-linear-gradient(-45deg, transparent 0 18px, rgba(60,40,20,0.04) 18px 19px);
+  pointer-events:none;
+}
+.feat-photo--placeholder .fp-wm-sm{
+  position:relative;
+  font-family:var(--serif);
+  font-size:10px;
+  letter-spacing:0.1em;
+  white-space:nowrap;
+  color:rgba(60,40,20,0.62);
+  background:rgba(255,255,255,0.78);
+  padding:5px 9px;
+  border-radius:999px;
+  border:1px solid rgba(60,40,20,0.12);
+}
+
+/* ── 底圖欄位 (background-image slot) ──
+   Adds a photo layer behind a card's existing content.
+   Once the formal photo is provided, set it on .bgphoto-ph, e.g.
+   <div class="bgphoto-ph" style="background:url(...) center/cover;">
+   (an extra translucent white wash may be added for text legibility). */
+.has-bgphoto{
+  position:relative;
+  overflow:hidden;
+  isolation:isolate; /* own stacking context so z-index:-1 stays inside the card */
+}
+.bgphoto-ph{
+  position:absolute;
+  inset:0;
+  z-index:-1; /* behind all card content (incl. bare text nodes), above card bg */
+  pointer-events:none;
+  background:
+    radial-gradient(circle at 28% 22%, rgba(168,197,133,0.30), transparent 55%),
+    radial-gradient(circle at 78% 78%, rgba(200,144,88,0.16), transparent 60%),
+    linear-gradient(135deg, #f3ecdc 0%, #e4d8bd 100%);
+}
+.bgphoto-ph::before{
+  content:'';
+  position:absolute;
+  inset:0;
+  background-image:
+    repeating-linear-gradient(45deg, transparent 0 18px, rgba(60,40,20,0.04) 18px 19px),
+    repeating-linear-gradient(-45deg, transparent 0 18px, rgba(60,40,20,0.04) 18px 19px);
+}
+.bgphoto-ph::after{
+  content:'待提供正式圖片';
+  position:absolute;
+  right:8px;
+  bottom:8px;
+  font-family:var(--serif);
+  font-size:9px;
+  letter-spacing:0.08em;
+  white-space:nowrap;
+  color:rgba(60,40,20,0.55);
+  background:rgba(255,255,255,0.72);
+  padding:3px 8px;
+  border-radius:999px;
+  border:1px solid rgba(60,40,20,0.12);
+}
 
 /* Image switcher (carousel) — matches quote card width & radius */
 .img-switch{
@@ -1610,8 +1726,15 @@ body{
 .tabs{
   display:flex;
   gap:8px;
+  /* Full-bleed scroll viewport (progressive disclosure): negative margins
+     break out of .article's 20px side padding so the partially visible
+     next tab button is cut by the SCREEN edge; the 20px side padding here
+     keeps the first/last buttons aligned with the page content.
+     (.tabs is used only on 動物生態 / 植物生態.) */
+  margin:0 -20px;
   padding:0 20px 12px;
   overflow-x:auto;
+  scroll-padding-inline:20px;
   scrollbar-width:none;
   -ms-overflow-style:none;
 }
@@ -1632,44 +1755,6 @@ body{
   background:var(--moss-dark);
   color:#fff;
   border-color:var(--moss-dark);
-}
-
-/* qr scanner */
-.qr-screen{
-  background:#1a1a1a;
-  color:#fff;
-  min-height:100%;
-  display:flex;
-  flex-direction:column;
-}
-.qr-frame{
-  width:260px;
-  height:260px;
-  margin:32px auto 20px;
-  position:relative;
-}
-.qr-frame::before, .qr-frame::after,
-.qr-frame .c1, .qr-frame .c2{
-  content:'';
-  position:absolute;
-  width:40px;height:40px;
-  border:4px solid var(--leaf-light);
-}
-.qr-frame::before{top:0;left:0;border-right:none;border-bottom:none;border-top-left-radius:16px;}
-.qr-frame::after{top:0;right:0;border-left:none;border-bottom:none;border-top-right-radius:16px;}
-.qr-frame .c1{bottom:0;left:0;border-right:none;border-top:none;border-bottom-left-radius:16px;}
-.qr-frame .c2{bottom:0;right:0;border-left:none;border-top:none;border-bottom-right-radius:16px;}
-.qr-line{
-  position:absolute;
-  top:0;left:8px;right:8px;
-  height:2px;
-  background:linear-gradient(to right, transparent, var(--leaf-light), transparent);
-  animation:scanLine 2.4s ease-in-out infinite;
-  box-shadow:0 0 12px var(--leaf-light);
-}
-@keyframes scanLine{
-  0%,100%{top:8px;}
-  50%{top:240px;}
 }
 
 /* introduction badge */
@@ -1931,12 +2016,11 @@ body{
   margin-bottom:16px;
 }
 
-/* Accordion variant: expanded by default, taller to reveal preview text,
-   with a "更多" button at the bottom-right that opens the detail page. */
+/* Accordion variant: expanded by default, taller to reveal preview text.
+   The whole card is clickable and opens the detail page. */
 .resume-card--accordion{
   align-items:stretch;
-  padding-bottom:48px;
-  cursor:default;
+  cursor:pointer;
 }
 .resume-card--accordion .rc-preview{
   font-size:12px;
@@ -1948,26 +2032,6 @@ body{
   -webkit-box-orient:vertical;
   overflow:hidden;
 }
-.resume-card--accordion .rc-more{
-  position:absolute;
-  right:16px;
-  bottom:16px;
-  background:transparent;
-  color:#fff;
-  border:none;
-  padding:4px 0;
-  font-size:12px;
-  font-weight:700;
-  font-family:inherit;
-  cursor:pointer;
-  letter-spacing:0.04em;
-  text-decoration:underline;
-  text-underline-offset:3px;
-  transition:opacity 0.15s;
-  z-index:2;
-}
-.resume-card--accordion .rc-more:hover{opacity:0.8;}
-.resume-card--accordion .rc-more:active{opacity:0.6;}
 .resume-card::before{
   content:'';
   position:absolute;
@@ -2011,13 +2075,19 @@ body{
 .h-carousel{
   display:flex;
   gap:8px;
-  margin:0 20px;
+  /* Full-bleed scroll viewport (progressive disclosure): the partially
+     visible next card is cut by the SCREEN edge, not the content padding.
+     Same pattern as .ec-swipe; 20px content inset moves to first/last card. */
+  margin:0;
   padding:0 0 20px;
   overflow-x:auto;
   -webkit-overflow-scrolling:touch;
   scrollbar-width:none;
   scroll-snap-type:x mandatory;
+  scroll-padding-inline:20px;
 }
+.h-carousel > .hc-card:first-child{ margin-left:20px; }
+.h-carousel > .hc-card:last-child{ margin-right:20px; }
 .h-carousel::-webkit-scrollbar{display:none;}
 .hc-card{
   flex:0 0 42%;
@@ -2313,6 +2383,8 @@ body{
 .pc-bar{height:8px;background:rgba(60,40,20,0.07);border-radius:4px;overflow:hidden;margin:8px 0 8px;}
 .pc-fill{height:100%;border-radius:4px;transition:width .4s ease;}
 .pc-cap{font-size:12px;color:var(--ink-soft);opacity:0.75;}
+/* Badges inlined into the 四季教案 progress card */
+.pc-badges{margin-top:16px;}
 
 .badge-row{
   display:grid;
@@ -2369,7 +2441,7 @@ body{
   position:sticky;
   bottom:0;
   left:0;right:0;
-  background:rgba(253,250,242,0.96);
+  background:rgb(253,250,242); /* fully opaque (was rgba alpha 0.96) */
   backdrop-filter:blur(20px);
   border-top:1px solid rgba(60,40,20,0.07);
   display:flex;
@@ -2397,6 +2469,11 @@ body{
 .action-btn.primary{
   background:var(--moss-dark);
   color:#fff;
+}
+/* Completed state (mock demo): set by markLessonDone() */
+.action-btn.primary.done{
+  background:#FDFAF3;
+  color:#2B2419; /* svg uses stroke="currentColor", so icon follows */
 }
 .action-btn:active{transform:scale(0.97);}
 
@@ -2505,22 +2582,20 @@ body{
 }
 .sheet-close svg{width:16px; height:16px;}
 .sheet-body{
-  padding:16px 20px 80px;
+  /* Single scroll container for the whole sheet content (hero + title +
+     text), mirroring .me-sheet-body. Side padding for text moved to
+     .sheet-body-pad so the hero can bleed full-width. */
+  padding:0 0 80px;
   flex:1;
   min-height:0;
   overflow-y:scroll;
   -webkit-overflow-scrolling:touch;
-  scrollbar-width:thin;
-  scrollbar-color:rgba(60,40,20,0.5) rgba(60,40,20,0.08);
+  /* Scrollbar hidden, same as .me-sheet-body */
+  scrollbar-width:none;
+  -ms-overflow-style:none;
 }
-.sheet-body::-webkit-scrollbar{width:8px;-webkit-appearance:none;}
-.sheet-body::-webkit-scrollbar-track{background:rgba(60,40,20,0.08);border-radius:4px;}
-.sheet-body::-webkit-scrollbar-thumb{
-  background:rgba(60,40,20,0.5);
-  border-radius:4px;
-  min-height:40px;
-}
-.sheet-body::-webkit-scrollbar-thumb:hover{background:rgba(60,40,20,0.7);}
+.sheet-body::-webkit-scrollbar{display:none;}
+.sheet-body-pad{padding:16px 20px 0;}
 .sheet-tags{display:flex; flex-wrap:wrap; gap:8px; margin-bottom:16px;}
 .sheet-tag{
   font-size:12px; font-weight:600;
@@ -2809,9 +2884,9 @@ body{
   <div class="screen active" id="screen-home">
     <div class="content">
       <div class="home-greet">
-        <div class="greet-text">
-          <div class="greet-hi">早安，修業生</div>
-          <div class="greet-date" id="greetDate">五月 25 日・週一</div>
+        <div>
+          <div class="greet-hi">午安，繼續探索</div>
+          <div class="greet-date" id="greetDate">—</div>
         </div>
         <div class="greet-bell" onclick="openMeSheet()" aria-label="個人資訊">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4.4 3.6-8 8-8s8 3.6 8 8"/></svg>
@@ -2819,14 +2894,21 @@ body{
       </div>
 
       <!-- ESG vision card -->
-      <div class="resume-card resume-card--esg resume-card--accordion">
+      <div class="resume-card resume-card--esg resume-card--accordion" onclick="go('esg')">
         <div class="rc-meta">
           <div class="rc-eyebrow">關於里山學堂</div>
           <div class="rc-title">鴻海 ESG 永續願景</div>
           <div class="rc-sub">企業社會責任與里山倡議</div>
           <div class="rc-preview">鴻海秉持「科技開啟智慧生活，用心造就永續發展，攜手共創美好未來」的願景，致力於將企業影響力轉化為守護地球的力量。</div>
         </div>
-        <button class="rc-more" onclick="go('esg')">更多</button>
+      </div>
+
+      <!-- Build Satoyama Academy card -->
+      <div class="resume-card resume-card--accordion" onclick="switchTab('tasks')">
+        <div class="rc-meta">
+          <div class="rc-title">里山學堂</div>
+          <div class="rc-preview">歡迎來到「永續生態計畫—里山學堂」！這不是一門只在教室裡聽講的課，而是一場深入雞籠坑林地與土質的科學實踐。</div>
+        </div>
       </div>
 
       <!-- Catalog entry card -->
@@ -2843,29 +2925,53 @@ body{
 
       <!-- Today / season suggestion -->
       <div class="home-section-h">
-        <span class="h-title">本季推薦</span>
+        <span class="h-title">龍潭四季環教教案</span>
         <span class="h-more" onclick="go('seasons')">查看全部 ›</span>
       </div>
-      <div class="h-carousel">
-        <div class="hc-card hc-spring" onclick="go('spring-tung')">
+      <div class="h-carousel" id="hCarousel">
+        <div class="hc-card hc-spring" data-season="spring" onclick="go('spring-tung')">
           <div class="hc-tag">春・水源環境</div>
           <div class="hc-name">桐花大解密</div>
           <div class="hc-sub">山林裡的五月雪</div>
           <svg class="hc-art" viewBox="0 0 60 60"><g fill="#fff" opacity="0.7"><circle cx="20" cy="20" r="7"/><circle cx="35" cy="14" r="6"/><circle cx="42" cy="30" r="7"/><circle cx="22" cy="38" r="6"/></g></svg>
         </div>
-        <div class="hc-card hc-summer" onclick="go('summer-tea')">
+        <div class="hc-card hc-spring" data-season="spring" onclick="go('spring-firefly')">
+          <div class="hc-tag">春・水源環境</div>
+          <div class="hc-name">螢火蟲特攻隊</div>
+          <div class="hc-sub">黑夜裡的發光特工</div>
+          <svg class="hc-art" viewBox="0 0 60 60"><g fill="#fff"><circle cx="22" cy="34" r="6" opacity="0.85"/><ellipse cx="16" cy="28" rx="6" ry="3" transform="rotate(-30 16 28)" opacity="0.5"/><ellipse cx="28" cy="28" rx="6" ry="3" transform="rotate(30 28 28)" opacity="0.5"/><circle cx="42" cy="16" r="2.5" opacity="0.9"/><circle cx="48" cy="30" r="2" opacity="0.7"/><circle cx="38" cy="44" r="2.5" opacity="0.8"/></g></svg>
+        </div>
+        <div class="hc-card hc-summer" data-season="summer" onclick="go('summer-tea')">
           <div class="hc-tag">夏・溪谷環境</div>
           <div class="hc-name">龍潭茶</div>
           <div class="hc-sub">紅土地上的神奇小綠葉</div>
           <svg class="hc-art" viewBox="0 0 60 60"><g fill="#fff" opacity="0.7"><path d="M14 38 L22 22 L30 38 Z"/><path d="M28 38 L36 18 L44 38 Z"/></g></svg>
         </div>
-        <div class="hc-card hc-autumn" onclick="go('autumn-bat')">
+        <div class="hc-card hc-summer" data-season="summer" onclick="go('summer-mongoose')">
+          <div class="hc-tag">夏・溪谷環境</div>
+          <div class="hc-name">食蟹獴</div>
+          <div class="hc-sub">溪流與丘陵的生態哨兵</div>
+          <svg class="hc-art" viewBox="0 0 60 60"><g fill="#fff" opacity="0.7"><ellipse cx="28" cy="34" rx="14" ry="8"/><circle cx="44" cy="28" r="6"/><path d="M14 36 Q6 38 8 44" stroke="#fff" stroke-width="3" fill="none" stroke-linecap="round"/></g></svg>
+        </div>
+        <div class="hc-card hc-autumn" data-season="autumn" onclick="go('autumn-grass')">
+          <div class="hc-tag">秋・土地環境</div>
+          <div class="hc-name">仙草</div>
+          <div class="hc-sub">大地的清涼獻禮</div>
+          <svg class="hc-art" viewBox="0 0 60 60"><g fill="#fff" opacity="0.7"><path d="M30 48 L30 22" stroke="#fff" stroke-width="3" fill="none" stroke-linecap="round"/><path d="M30 40 Q20 36 16 26 Q26 28 30 36 Z"/><path d="M30 34 Q40 30 44 20 Q34 22 30 30 Z"/><circle cx="30" cy="16" r="4"/></g></svg>
+        </div>
+        <div class="hc-card hc-autumn" data-season="autumn" onclick="go('autumn-bat')">
           <div class="hc-tag">秋・土地環境</div>
           <div class="hc-name">蝙蝠</div>
           <div class="hc-sub">森林裡的暗夜巡守隊</div>
           <svg class="hc-art" viewBox="0 0 60 60"><g fill="#fff" opacity="0.7"><path d="M10 30 Q22 18 30 24 Q38 18 50 30 Q44 28 38 32 L30 36 L22 32 Q16 28 10 30 Z"/></g></svg>
         </div>
-        <div class="hc-card hc-winter" onclick="go('winter-pangolin')">
+        <div class="hc-card hc-winter" data-season="winter" onclick="go('winter-radish')">
+          <div class="hc-tag">冬・稜線環境</div>
+          <div class="hc-name">蘿蔔</div>
+          <div class="hc-sub">紅土地孕育的客家靈魂</div>
+          <svg class="hc-art" viewBox="0 0 60 60"><g fill="#fff" opacity="0.7"><path d="M30 50 Q22 38 24 28 Q26 22 30 22 Q34 22 36 28 Q38 38 30 50 Z"/><path d="M26 22 Q22 12 16 10 M30 22 Q30 12 30 8 M34 22 Q38 12 44 10" stroke="#fff" stroke-width="2.5" fill="none" stroke-linecap="round"/></g></svg>
+        </div>
+        <div class="hc-card hc-winter" data-season="winter" onclick="go('winter-pangolin')">
           <div class="hc-tag">冬・稜線環境</div>
           <div class="hc-name">穿山甲</div>
           <div class="hc-sub">森林裡的盔甲精靈</div>
@@ -2875,7 +2981,7 @@ body{
 
       <!-- Trail quick card -->
       <div class="home-section-h">
-        <span class="h-title">雞籠坑步道</span>
+        <span class="h-title">雞籠坑生物多樣性步道</span>
         <span class="h-more" onclick="go('trail')">前往 ›</span>
       </div>
       <div class="trail-card" onclick="go('trail')">
@@ -3356,6 +3462,7 @@ body{
       <div class="article">
         <div class="article-section">
           <h2 class="h2">導覽人才培訓</h2>
+          <div class="field-photo field-photo--placeholder"><span class="fp-wm">待提供正式圖片</span></div>
           <p class="p">以 <strong>鴻海企業志工、在地國中小教師與居民</strong> 為培訓對象。課程核心在於「<strong>知識轉譯</strong>」，教導學員如何運用譬喻、擬人化與五感互動（觀察、提問），將專業的科學數據轉化為具備故事感的引導內容，練習在實地導覽中建立具人文溫度的互動氛圍。</p>
         </div>
 
@@ -3492,57 +3599,30 @@ body{
           <h2 class="story-h">遇見生態大明星的家</h2>
           <p class="story-p">透過我們的「生態地圖」，你可以發現這片森林是許多「<strong>超級大明星</strong>」的棲息避難所。這裡住著珍貴稀有的穿山甲、帥氣的食蟹獴，還有臺灣藍鵲、五色鳥、鼬獾與可愛的臺北樹蛙。你可以沿著步道觀察牠們的生活蹤跡，感受生物多樣性的脈動。</p>
 
-          <div class="ec-marquee">
-            <div class="ec-track">
-              <div class="ec-card" style="background:linear-gradient(135deg,#8b5a3c,#5a3a24);">
-                <div class="ec-art"><svg viewBox="0 0 60 60" fill="none"><g fill="#fff" opacity="0.88"><polygon points="14,30 20,28 22,32 16,34"/><polygon points="22,30 28,28 30,32 24,34"/><polygon points="30,30 36,28 38,32 32,34"/><polygon points="38,30 44,28 46,32 40,34"/><polygon points="18,38 24,36 26,40 20,42"/><polygon points="26,38 32,36 34,40 28,42"/></g></svg></div>
-                <div class="ec-name">穿山甲</div>
-              </div>
-              <div class="ec-card" style="background:linear-gradient(135deg,#7a6555,#4a3a2a);">
-                <div class="ec-art"><svg viewBox="0 0 60 60" fill="none"><g fill="#fff" opacity="0.85"><ellipse cx="30" cy="32" rx="14" ry="9"/><circle cx="20" cy="26" r="6"/><circle cx="18" cy="24" r="1.5" fill="#4a3a2a"/><path d="M44 28 Q48 30 46 34" stroke="#fff" stroke-width="2" fill="none"/></g></svg></div>
-                <div class="ec-name">食蟹獴</div>
-              </div>
-              <div class="ec-card" style="background:linear-gradient(135deg,#3a5d8c,#1f3a5c);">
-                <div class="ec-art"><svg viewBox="0 0 60 60" fill="none"><g fill="#fff" opacity="0.88"><ellipse cx="28" cy="30" rx="10" ry="7"/><circle cx="20" cy="24" r="5"/><circle cx="19" cy="23" r="1" fill="#1f3a5c"/><path d="M38 30 L52 28 L48 34 Z"/><path d="M22 36 L20 46 M26 38 L25 48" stroke="#fff" stroke-width="2"/></g></svg></div>
-                <div class="ec-name">臺灣藍鵲</div>
-              </div>
-              <div class="ec-card" style="background:linear-gradient(135deg,#7a9d5c,#4a6b3a);">
-                <div class="ec-art"><svg viewBox="0 0 60 60" fill="none"><g fill="#fff" opacity="0.88"><ellipse cx="30" cy="32" rx="9" ry="7"/><circle cx="23" cy="26" r="5"/><circle cx="22" cy="25" r="1" fill="#4a6b3a"/><path d="M38 30 L46 28 L44 34 Z"/><circle cx="27" cy="27" r="2" fill="#f5a96a"/></g></svg></div>
-                <div class="ec-name">五色鳥</div>
-              </div>
-              <div class="ec-card" style="background:linear-gradient(135deg,#9b7a5a,#5e4a32);">
-                <div class="ec-art"><svg viewBox="0 0 60 60" fill="none"><g fill="#fff" opacity="0.88"><ellipse cx="32" cy="32" rx="12" ry="8"/><circle cx="22" cy="28" r="5"/><circle cx="20" cy="27" r="1" fill="#5e4a32"/><path d="M28 26 L34 26" stroke="#fff" stroke-width="2"/></g></svg></div>
-                <div class="ec-name">鼬獾</div>
-              </div>
-              <div class="ec-card" style="background:linear-gradient(135deg,#5a8a55,#2f5a32);">
-                <div class="ec-art"><svg viewBox="0 0 60 60" fill="none"><g fill="#fff" opacity="0.88"><ellipse cx="30" cy="34" rx="12" ry="8"/><circle cx="22" cy="28" r="5"/><circle cx="38" cy="28" r="5"/><circle cx="22" cy="28" r="2" fill="#2f5a32"/><circle cx="38" cy="28" r="2" fill="#2f5a32"/></g></svg></div>
-                <div class="ec-name">臺北樹蛙</div>
-              </div>
-              <!-- duplicate set for seamless infinite scroll -->
-              <div class="ec-card" style="background:linear-gradient(135deg,#8b5a3c,#5a3a24);" aria-hidden="true">
-                <div class="ec-art"><svg viewBox="0 0 60 60" fill="none"><g fill="#fff" opacity="0.88"><polygon points="14,30 20,28 22,32 16,34"/><polygon points="22,30 28,28 30,32 24,34"/><polygon points="30,30 36,28 38,32 32,34"/><polygon points="38,30 44,28 46,32 40,34"/><polygon points="18,38 24,36 26,40 20,42"/><polygon points="26,38 32,36 34,40 28,42"/></g></svg></div>
-                <div class="ec-name">穿山甲</div>
-              </div>
-              <div class="ec-card" style="background:linear-gradient(135deg,#7a6555,#4a3a2a);" aria-hidden="true">
-                <div class="ec-art"><svg viewBox="0 0 60 60" fill="none"><g fill="#fff" opacity="0.85"><ellipse cx="30" cy="32" rx="14" ry="9"/><circle cx="20" cy="26" r="6"/><circle cx="18" cy="24" r="1.5" fill="#4a3a2a"/><path d="M44 28 Q48 30 46 34" stroke="#fff" stroke-width="2" fill="none"/></g></svg></div>
-                <div class="ec-name">食蟹獴</div>
-              </div>
-              <div class="ec-card" style="background:linear-gradient(135deg,#3a5d8c,#1f3a5c);" aria-hidden="true">
-                <div class="ec-art"><svg viewBox="0 0 60 60" fill="none"><g fill="#fff" opacity="0.88"><ellipse cx="28" cy="30" rx="10" ry="7"/><circle cx="20" cy="24" r="5"/><circle cx="19" cy="23" r="1" fill="#1f3a5c"/><path d="M38 30 L52 28 L48 34 Z"/><path d="M22 36 L20 46 M26 38 L25 48" stroke="#fff" stroke-width="2"/></g></svg></div>
-                <div class="ec-name">臺灣藍鵲</div>
-              </div>
-              <div class="ec-card" style="background:linear-gradient(135deg,#7a9d5c,#4a6b3a);" aria-hidden="true">
-                <div class="ec-art"><svg viewBox="0 0 60 60" fill="none"><g fill="#fff" opacity="0.88"><ellipse cx="30" cy="32" rx="9" ry="7"/><circle cx="23" cy="26" r="5"/><circle cx="22" cy="25" r="1" fill="#4a6b3a"/><path d="M38 30 L46 28 L44 34 Z"/><circle cx="27" cy="27" r="2" fill="#f5a96a"/></g></svg></div>
-                <div class="ec-name">五色鳥</div>
-              </div>
-              <div class="ec-card" style="background:linear-gradient(135deg,#9b7a5a,#5e4a32);" aria-hidden="true">
-                <div class="ec-art"><svg viewBox="0 0 60 60" fill="none"><g fill="#fff" opacity="0.88"><ellipse cx="32" cy="32" rx="12" ry="8"/><circle cx="22" cy="28" r="5"/><circle cx="20" cy="27" r="1" fill="#5e4a32"/><path d="M28 26 L34 26" stroke="#fff" stroke-width="2"/></g></svg></div>
-                <div class="ec-name">鼬獾</div>
-              </div>
-              <div class="ec-card" style="background:linear-gradient(135deg,#5a8a55,#2f5a32);" aria-hidden="true">
-                <div class="ec-art"><svg viewBox="0 0 60 60" fill="none"><g fill="#fff" opacity="0.88"><ellipse cx="30" cy="34" rx="12" ry="8"/><circle cx="22" cy="28" r="5"/><circle cx="38" cy="28" r="5"/><circle cx="22" cy="28" r="2" fill="#2f5a32"/><circle cx="38" cy="28" r="2" fill="#2f5a32"/></g></svg></div>
-                <div class="ec-name">臺北樹蛙</div>
-              </div>
+          <div class="ec-swipe">
+            <div class="ec-card" style="background:linear-gradient(135deg,#8b5a3c,#5a3a24);">
+              <div class="ec-art"><svg viewBox="0 0 60 60" fill="none"><g fill="#fff" opacity="0.88"><polygon points="14,30 20,28 22,32 16,34"/><polygon points="22,30 28,28 30,32 24,34"/><polygon points="30,30 36,28 38,32 32,34"/><polygon points="38,30 44,28 46,32 40,34"/><polygon points="18,38 24,36 26,40 20,42"/><polygon points="26,38 32,36 34,40 28,42"/></g></svg></div>
+              <div class="ec-name">穿山甲</div>
+            </div>
+            <div class="ec-card" style="background:linear-gradient(135deg,#7a6555,#4a3a2a);">
+              <div class="ec-art"><svg viewBox="0 0 60 60" fill="none"><g fill="#fff" opacity="0.85"><ellipse cx="30" cy="32" rx="14" ry="9"/><circle cx="20" cy="26" r="6"/><circle cx="18" cy="24" r="1.5" fill="#4a3a2a"/><path d="M44 28 Q48 30 46 34" stroke="#fff" stroke-width="2" fill="none"/></g></svg></div>
+              <div class="ec-name">食蟹獴</div>
+            </div>
+            <div class="ec-card" style="background:linear-gradient(135deg,#3a5d8c,#1f3a5c);">
+              <div class="ec-art"><svg viewBox="0 0 60 60" fill="none"><g fill="#fff" opacity="0.88"><ellipse cx="28" cy="30" rx="10" ry="7"/><circle cx="20" cy="24" r="5"/><circle cx="19" cy="23" r="1" fill="#1f3a5c"/><path d="M38 30 L52 28 L48 34 Z"/><path d="M22 36 L20 46 M26 38 L25 48" stroke="#fff" stroke-width="2"/></g></svg></div>
+              <div class="ec-name">臺灣藍鵲</div>
+            </div>
+            <div class="ec-card" style="background:linear-gradient(135deg,#7a9d5c,#4a6b3a);">
+              <div class="ec-art"><svg viewBox="0 0 60 60" fill="none"><g fill="#fff" opacity="0.88"><ellipse cx="30" cy="32" rx="9" ry="7"/><circle cx="23" cy="26" r="5"/><circle cx="22" cy="25" r="1" fill="#4a6b3a"/><path d="M38 30 L46 28 L44 34 Z"/><circle cx="27" cy="27" r="2" fill="#f5a96a"/></g></svg></div>
+              <div class="ec-name">五色鳥</div>
+            </div>
+            <div class="ec-card" style="background:linear-gradient(135deg,#9b7a5a,#5e4a32);">
+              <div class="ec-art"><svg viewBox="0 0 60 60" fill="none"><g fill="#fff" opacity="0.88"><ellipse cx="32" cy="32" rx="12" ry="8"/><circle cx="22" cy="28" r="5"/><circle cx="20" cy="27" r="1" fill="#5e4a32"/><path d="M28 26 L34 26" stroke="#fff" stroke-width="2"/></g></svg></div>
+              <div class="ec-name">鼬獾</div>
+            </div>
+            <div class="ec-card" style="background:linear-gradient(135deg,#5a8a55,#2f5a32);">
+              <div class="ec-art"><svg viewBox="0 0 60 60" fill="none"><g fill="#fff" opacity="0.88"><ellipse cx="30" cy="34" rx="12" ry="8"/><circle cx="22" cy="28" r="5"/><circle cx="38" cy="28" r="5"/><circle cx="22" cy="28" r="2" fill="#2f5a32"/><circle cx="38" cy="28" r="2" fill="#2f5a32"/></g></svg></div>
+              <div class="ec-name">臺北樹蛙</div>
             </div>
           </div>
         </section>
@@ -3801,6 +3881,7 @@ body{
 
         <div class="article-section">
           <h2 class="h2">雙重土系的「並肩守護」</h2>
+          <div class="field-photo field-photo--placeholder"><span class="fp-wm">待提供正式圖片</span></div>
           <p class="p">在龍潭地表之下，這片土地由兩種土層隨地形起伏共同構築了支撐里山生態的地基。由於此地長期受高溫多雨的濕潤氣候影響，土壤普遍呈現<strong>強酸性（pH 值約 4.09）</strong>，且鹽基飽和度極低，展現出強烈淋洗作用下的地質特徵：</p>
 
           <div class="stat-row">
@@ -4248,6 +4329,7 @@ body{
 
         <div class="article-section">
           <h2 class="h2">棲地保衛戰：精準移除「綠色癌症」</h2>
+          <div class="field-photo field-photo--placeholder"><span class="fp-wm">待提供正式圖片</span></div>
           <p class="p">為了守護場域內珍貴的 295 種原生植物，移除強勢外來入侵種是維護生態平衡的長期任務：</p>
 
           <div class="hl">
@@ -4278,6 +4360,7 @@ body{
         </div>
 
         <div class="quote">
+          <div class="field-photo field-photo--placeholder field-photo--inner"><span class="fp-wm">待提供正式圖片</span></div>
           <div class="qt">守護約定：成為里山修業的一份子</div>
           <div class="qp">走過雞籠坑，你已見證了治理工程與科學研究如何攜手守護環境。我們邀請您一起參與守護：</div>
         </div>
@@ -4574,12 +4657,14 @@ body{
           <p class="p">變身偵探看花瓣：路邊掉落的桐花藏著性別密碼！</p>
 
           <div class="stat-row" style="margin-top:16px;">
-            <div class="stat-box">
+            <div class="stat-box has-bgphoto">
+              <div class="bgphoto-ph"></div>
               <div class="sb-num" style="color:#c89058;">♂</div>
               <div class="sb-label">雄花・男生</div>
               <div class="sb-sub">掉落時是整朵花完整落下的，中心有黃色或紅色的花藥</div>
             </div>
-            <div class="stat-box">
+            <div class="stat-box has-bgphoto">
+              <div class="bgphoto-ph"></div>
               <div class="sb-num" style="color:#a26a4a;">♀</div>
               <div class="sb-label">雌花・女生</div>
               <div class="sb-sub">花瓣會一片片飄落，把中心最重要的「子房」留在樹上，準備長成大果實</div>
@@ -4594,11 +4679,13 @@ body{
 
           <div class="h3" style="margin-top:24px;">兩大門派</div>
           <div class="two-col">
-            <div class="col">
+            <div class="col has-bgphoto">
+              <div class="bgphoto-ph"></div>
               <b style="color:var(--clay);">三年桐</b><br>
               雌雄花長在 <b>同一棵樹上</b>
             </div>
-            <div class="col">
+            <div class="col has-bgphoto">
+              <div class="bgphoto-ph"></div>
               <b style="color:var(--moss-dark);">千年桐</b><br>
               比較有個性，雄花和雌花通常<b>分開住在不同的樹</b>
             </div>
@@ -4619,6 +4706,8 @@ body{
             <div class="ftitle">大自然的循環</div>
             <p>這些掉落的花在樹下腐爛後，會變成超棒的天然養分，讓桐花樹長得更高更壯。</p>
           </div>
+
+          <div class="field-photo field-photo--placeholder"><span class="fp-wm">待提供正式圖片</span></div>
         </section>
 
         <!-- 環境共生 -->
@@ -4645,12 +4734,17 @@ body{
           <div class="h2">我們可以怎麼做？</div>
 
           <div class="feat-card green" style="margin-top:16px;background:linear-gradient(135deg,#e8a5a5 0%,#c97878 100%);color:#fff;">
-            <div class="ftitle" style="color:#fff;">賞花不留痕跡</div>
-            <p style="color:rgba(255,255,255,0.92);">在步道觀察完可愛的桐花後，記得把它們放回樹下，讓它們能順利變成養分回報給土地。</p>
+            <div class="feat-flex">
+              <div class="feat-body">
+                <div class="ftitle" style="color:#fff;">賞花不留痕跡</div>
+                <p style="color:rgba(255,255,255,0.92);">在步道觀察完可愛的桐花後，記得把它們放回樹下，讓它們能順利變成養分回報給土地。</p>
+              </div>
+              <div class="feat-photo--placeholder"><span class="fp-wm-sm">待提供正式圖片</span></div>
+            </div>
           </div>
         </section>
 <div class="action-bar">
-          <div class="action-btn primary"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>標記已完成</div>
+          <div class="action-btn primary" data-lesson="spring-tung" onclick="markLessonDone('spring-tung')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>標記已完成</div>
         </div>
       </div>
     </div>
@@ -4694,19 +4788,22 @@ body{
           <p class="p">螢火蟲一輩子要經歷 <b>卵→幼蟲→蛹→成蟲</b> 四個階段，每個階段長得完全不一樣！而且發光不是為了好玩——是有任務的。</p>
 
           <div class="stat-row" style="margin-top:16px;">
-            <div class="stat-box">
+            <div class="stat-box has-bgphoto">
+              <div class="bgphoto-ph"></div>
               <div class="sb-num" style="color:#c89058;font-size:20px;">小朋友</div>
               <div class="sb-label"><b>卵・幼蟲・蛹</b></div>
               <div class="sb-sub">發光是大喊：<br>「我有毒，<br>別吃我！」</div>
             </div>
-            <div class="stat-box">
+            <div class="stat-box has-bgphoto">
+              <div class="bgphoto-ph"></div>
               <div class="sb-num" style="color:#c89058;font-size:20px;">大人</div>
               <div class="sb-label"><b>成蟲</b></div>
               <div class="sb-sub">發光是「告白」，在黑夜裡閃爍訊號尋找另一半</div>
             </div>
           </div>
 
-          <div class="feat-card green" style="margin-top:16px;">
+          <div class="feat-card green has-bgphoto" style="margin-top:16px;">
+            <div class="bgphoto-ph"></div>
             <div class="label">誰是男生？誰是女生？</div>
             <div class="ftitle">看發光器的節數</div>
             <p>雄螢火蟲通常有<b>兩節</b>發光器，雌螢火蟲則有<b>一節</b>。</p>
@@ -4809,7 +4906,7 @@ body{
           </div>
         </section>
 <div class="action-bar">
-          <div class="action-btn primary"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>標記已完成</div>
+          <div class="action-btn primary" data-lesson="spring-firefly" onclick="markLessonDone('spring-firefly')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>標記已完成</div>
         </div>
       </div>
     </div>
@@ -4842,21 +4939,21 @@ body{
           <div class="h2">百年茶鄉，三大主角</div>
           <p class="p">龍潭種茶的歷史非常悠久，從很久以前（<b>清朝</b>）開始，這裡就是台灣超有名的茶家鄉！龍潭茶泡出來就像金色的太陽，聞起來有淡淡的清新花香，喝下一口，喉嚨會感覺甜甜潤潤的。</p>
 
-          <div class="stat-row three" style="margin-top:16px;">
-            <div class="stat-box" style="background:#f0f6ee;">
-              <div class="sb-num" style="color:#5a8a55;font-size:20px;">青心<br>大冇</div>
+          <div class="stat-row" style="margin-top:16px;grid-template-columns:1fr;">
+            <div class="stat-box" style="background:#f0f6ee;text-align:left;">
+              <div class="sb-num" style="color:#5a8a55;font-size:24px;">青心大冇</div>
               <div class="sb-label">早期最受歡迎</div>
-              <div class="sb-sub">是好喝的<br>包種茶和<br>東方美人茶的<br>小變身</div>
+              <div class="sb-sub" style="color:var(--ink);">是好喝的包種茶和東方美人茶的小變身</div>
             </div>
-            <div class="stat-box" style="background:#f0f6ee;">
+            <div class="stat-box" style="background:#f0f6ee;text-align:left;">
               <div class="sb-num" style="color:#5a8a55;font-size:24px;">翠玉</div>
               <div class="sb-label">現代品種</div>
-              <div class="sb-sub">聞起來<br>香噴噴</div>
+              <div class="sb-sub" style="color:var(--ink);">聞起來香噴噴</div>
             </div>
-            <div class="stat-box" style="background:#f0f6ee;">
+            <div class="stat-box" style="background:#f0f6ee;text-align:left;">
               <div class="sb-num" style="color:#5a8a55;font-size:24px;">金萱</div>
               <div class="sb-label">現代品種</div>
-              <div class="sb-sub">聞起來<br>香噴噴</div>
+              <div class="sb-sub" style="color:var(--ink);">聞起來香噴噴</div>
             </div>
           </div>
         </section>
@@ -4907,7 +5004,7 @@ body{
           </div>
         </section>
 <div class="action-bar">
-          <div class="action-btn primary"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>標記已完成</div>
+          <div class="action-btn primary" data-lesson="summer-tea" onclick="markLessonDone('summer-tea')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>標記已完成</div>
         </div>
       </div>
     </div>
@@ -5002,7 +5099,7 @@ body{
           </div>
         </section>
 <div class="action-bar">
-          <div class="action-btn primary"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>標記已完成</div>
+          <div class="action-btn primary" data-lesson="summer-mongoose" onclick="markLessonDone('summer-mongoose')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>標記已完成</div>
         </div>
       </div>
     </div>
@@ -5114,7 +5211,7 @@ body{
           </div>
         </section>
 <div class="action-bar">
-          <div class="action-btn primary"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>標記已完成</div>
+          <div class="action-btn primary" data-lesson="autumn-grass" onclick="markLessonDone('autumn-grass')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>標記已完成</div>
         </div>
       </div>
     </div>
@@ -5230,7 +5327,7 @@ body{
           </div>
         </section>
 <div class="action-bar">
-          <div class="action-btn primary"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>標記已完成</div>
+          <div class="action-btn primary" data-lesson="autumn-bat" onclick="markLessonDone('autumn-bat')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>標記已完成</div>
         </div>
       </div>
     </div>
@@ -5359,7 +5456,7 @@ body{
           </div>
         </section>
 <div class="action-bar">
-          <div class="action-btn primary"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>標記已完成</div>
+          <div class="action-btn primary" data-lesson="winter-radish" onclick="markLessonDone('winter-radish')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>標記已完成</div>
         </div>
       </div>
     </div>
@@ -5496,48 +5593,13 @@ body{
           </div>
         </section>
 <div class="action-bar">
-          <div class="action-btn primary"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>標記已完成</div>
+          <div class="action-btn primary" data-lesson="winter-pangolin" onclick="markLessonDone('winter-pangolin')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>標記已完成</div>
         </div>
       </div>
     </div>
   </div>
 
   <!-- ============ QR SCANNER ============ -->
-  <div class="screen" id="screen-scanner">
-    <div class="content qr-screen">
-      <div style="padding:56px 20px 16px;"></div>
-
-      <div class="qr-frame">
-        <div class="c1"></div>
-        <div class="c2"></div>
-        <div class="qr-line"></div>
-      </div>
-
-      <div style="text-align:center;padding:0 32px;">
-        <p style="font-family:var(--serif);font-size:16px;color:var(--leaf-light);margin-bottom:8px;letter-spacing:2px;">將鏡頭對準告示牌</p>
-        <p style="font-size:12px;color:rgba(255,255,255,0.65);line-height:1.8;">在雞籠坑步道沿線的六塊告示牌都附有 QR 碼，掃描後即可開啟對應的線上解說、影音與生態紀錄。</p>
-      </div>
-
-      <div style="margin-top:32px;padding:0 24px 32px;">
-        <div style="font-size:12px;color:rgba(255,255,255,0.5);text-align:center;letter-spacing:2px;margin-bottom:16px;">— 或選擇告示牌 —</div>
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
-          <div onclick="goFromScanner('trail-nature')" style="background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.15);border-radius:16px;padding:16px;cursor:pointer;">
-            <div style="font-family:var(--serif);font-size:16px;">自然環境</div>
-          </div>
-          <div onclick="goFromScanner('trail-animal')" style="background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.15);border-radius:16px;padding:16px;cursor:pointer;">
-            <div style="font-family:var(--serif);font-size:16px;">動物生態</div>
-          </div>
-          <div onclick="goFromScanner('trail-plant')" style="background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.15);border-radius:16px;padding:16px;cursor:pointer;">
-            <div style="font-family:var(--serif);font-size:16px;">植物生態</div>
-          </div>
-          <div onclick="goFromScanner('trail-conserv')" style="background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.15);border-radius:16px;padding:16px;cursor:pointer;">
-            <div style="font-family:var(--serif);font-size:16px;">生態保育</div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-
   <!-- ============ CATALOG (圖鑑) ============ -->
   <div class="screen" id="screen-catalog">
     <div class="content">
@@ -6014,7 +6076,7 @@ body{
           <div class="me-stat-row">
             <div class="me-stat"><div class="ms-num">3</div><div class="ms-lab">已造訪告示牌</div></div>
             <div class="me-stat"><div class="ms-num">12</div><div class="ms-lab">收集物種</div></div>
-            <div class="me-stat"><div class="ms-num">2</div><div class="ms-lab">完成任務</div></div>
+            <div class="me-stat"><div class="ms-num" id="meSeasonDoneNum">2</div><div class="ms-lab">完成教案</div></div>
           </div>
         </div>
 
@@ -6023,66 +6085,64 @@ body{
           <div class="progress-card">
             <div class="pc-head">
               <div class="pc-name">六塊告示牌</div>
-              <div class="pc-percent">50%</div>
+              <div class="pc-percent">已完成3個</div>
             </div>
             <div class="pc-bar"><div class="pc-fill" style="width:50%;background:var(--moss);"></div></div>
-            <div class="pc-cap">已掃描 3/6・繼續探索雞籠坑步道</div>
+            <div class="pc-cap">尚餘3個・繼續探索雞籠坑步道</div>
           </div>
           <div class="progress-card">
             <div class="pc-head">
               <div class="pc-name">四季教案</div>
-              <div class="pc-percent">25%</div>
+              <div class="pc-percent" id="seasonPcNum">已完成2個</div>
             </div>
-            <div class="pc-bar"><div class="pc-fill" style="width:25%;background:var(--clay);"></div></div>
-            <div class="pc-cap">已完成 1/4・春季桐花課程結業</div>
+            <div class="pc-bar"><div class="pc-fill" id="seasonPcFill" style="width:25%;background:var(--clay);"></div></div>
+            <div class="pc-cap" id="seasonPcCap">尚餘6個・繼續深入里山四季的生態故事</div>
+            <div class="pc-badges">
+              <div class="badge-row">
+                <div class="badge earned" data-lesson="spring-tung" onclick="closeMeSheet();switchTab('seasons');go('spring-tung')">
+                  <div class="bd-circle" style="background:linear-gradient(135deg,#e8a5a5,#c97878);">桐</div>
+                  <div class="bd-name">桐花</div>
+                </div>
+                <div class="badge" data-lesson="spring-firefly" onclick="closeMeSheet();switchTab('seasons');go('spring-firefly')">
+                  <div class="bd-circle">螢</div>
+                  <div class="bd-name">螢火蟲</div>
+                </div>
+                <div class="badge" data-lesson="summer-tea" onclick="closeMeSheet();switchTab('seasons');go('summer-tea')">
+                  <div class="bd-circle">茶</div>
+                  <div class="bd-name">龍潭茶</div>
+                </div>
+                <div class="badge earned" data-lesson="summer-mongoose" onclick="closeMeSheet();switchTab('seasons');go('summer-mongoose')">
+                  <div class="bd-circle" style="background:linear-gradient(135deg,#5a7d54,#3d5b3a);">獴</div>
+                  <div class="bd-name">食蟹獴</div>
+                </div>
+              </div>
+              <div class="badge-row" style="margin-top:16px;">
+                <div class="badge" data-lesson="autumn-grass" onclick="closeMeSheet();switchTab('seasons');go('autumn-grass')">
+                  <div class="bd-circle">仙</div>
+                  <div class="bd-name">仙草</div>
+                </div>
+                <div class="badge" data-lesson="autumn-bat" onclick="closeMeSheet();switchTab('seasons');go('autumn-bat')">
+                  <div class="bd-circle">蝠</div>
+                  <div class="bd-name">蝙蝠</div>
+                </div>
+                <div class="badge" data-lesson="winter-radish" onclick="closeMeSheet();switchTab('seasons');go('winter-radish')">
+                  <div class="bd-circle">蘿</div>
+                  <div class="bd-name">蘿蔔</div>
+                </div>
+                <div class="badge" data-lesson="winter-pangolin" onclick="closeMeSheet();switchTab('seasons');go('winter-pangolin')">
+                  <div class="bd-circle">甲</div>
+                  <div class="bd-name">穿山甲</div>
+                </div>
+              </div>
+            </div>
           </div>
           <div class="progress-card">
             <div class="pc-head">
               <div class="pc-name">物種圖鑑</div>
-              <div class="pc-percent">29%</div>
+              <div class="pc-percent">已完成12個</div>
             </div>
             <div class="pc-bar"><div class="pc-fill" style="width:29%;background:var(--water);"></div></div>
-            <div class="pc-cap">已收集 12/42 代表物種・繼續累積觀察紀錄</div>
-          </div>
-        </div>
-
-        <div class="me-section">
-          <div class="me-section-title">四季教案・修業徽章</div>
-          <div class="badge-row">
-            <div class="badge earned" onclick="closeMeSheet();switchTab('seasons');go('spring-tung')">
-              <div class="bd-circle" style="background:linear-gradient(135deg,#e8a5a5,#c97878);">桐</div>
-              <div class="bd-name">桐花</div>
-            </div>
-            <div class="badge" onclick="closeMeSheet();switchTab('seasons');go('spring-firefly')">
-              <div class="bd-circle">螢</div>
-              <div class="bd-name">螢火蟲</div>
-            </div>
-            <div class="badge" onclick="closeMeSheet();switchTab('seasons');go('summer-tea')">
-              <div class="bd-circle">茶</div>
-              <div class="bd-name">龍潭茶</div>
-            </div>
-            <div class="badge earned" onclick="closeMeSheet();switchTab('seasons');go('summer-mongoose')">
-              <div class="bd-circle" style="background:linear-gradient(135deg,#5a7d54,#3d5b3a);">獴</div>
-              <div class="bd-name">食蟹獴</div>
-            </div>
-          </div>
-          <div class="badge-row" style="margin-top:16px;">
-            <div class="badge" onclick="closeMeSheet();switchTab('seasons');go('autumn-grass')">
-              <div class="bd-circle">仙</div>
-              <div class="bd-name">仙草</div>
-            </div>
-            <div class="badge" onclick="closeMeSheet();switchTab('seasons');go('autumn-bat')">
-              <div class="bd-circle">蝠</div>
-              <div class="bd-name">蝙蝠</div>
-            </div>
-            <div class="badge" onclick="closeMeSheet();switchTab('seasons');go('winter-radish')">
-              <div class="bd-circle">蘿</div>
-              <div class="bd-name">蘿蔔</div>
-            </div>
-            <div class="badge" onclick="closeMeSheet();switchTab('seasons');go('winter-pangolin')">
-              <div class="bd-circle">甲</div>
-              <div class="bd-name">穿山甲</div>
-            </div>
+            <div class="pc-cap">尚餘30個・繼續累積觀察紀錄</div>
           </div>
         </div>
 
@@ -6098,36 +6158,36 @@ body{
     <div class="sheet">
       <div class="sheet-handle"></div>
 
-      <!-- Photo-card hero -->
-      <div class="sheet-hero" id="ssHero">
-        <div class="sheet-hero-bg" id="ssHeroBg"></div>
-        <svg class="sheet-hero-deco" id="ssHeroDeco" viewBox="0 0 360 260" preserveAspectRatio="xMidYMid slice"></svg>
-        <div class="sheet-hero-stamp">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="12" cy="13" r="3.5"/><path d="M5 7h3l2-3h4l2 3h3a2 2 0 012 2v10a2 2 0 01-2 2H5a2 2 0 01-2-2V9a2 2 0 012-2z"/></svg>
-          插畫示意・物種圖鑑
+      <!-- Whole content scrolls together (same structure as the Me sheet):
+           hero + title + body live inside the single scroll container -->
+      <div class="sheet-body">
+        <!-- Photo-card hero -->
+        <div class="sheet-hero" id="ssHero">
+          <div class="sheet-hero-bg" id="ssHeroBg"></div>
+          <svg class="sheet-hero-deco" id="ssHeroDeco" viewBox="0 0 360 260" preserveAspectRatio="xMidYMid slice"></svg>
+          <div class="sheet-hero-stamp">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="12" cy="13" r="3.5"/><path d="M5 7h3l2-3h4l2 3h3a2 2 0 012 2v10a2 2 0 01-2 2H5a2 2 0 01-2-2V9a2 2 0 012-2z"/></svg>
+            插畫示意・物種圖鑑
+          </div>
+          <div class="sheet-hero-cat" id="ssHeroCat">動物</div>
+          <div class="sheet-hero-main" id="ssHeroMain">
+            <svg viewBox="0 0 60 60" id="ssSvg"></svg>
+          </div>
+          <div class="sheet-hero-fade"></div>
         </div>
-        <div class="sheet-hero-cat" id="ssHeroCat">動物</div>
-        <div class="sheet-hero-main" id="ssHeroMain">
-          <svg viewBox="0 0 60 60" id="ssSvg"></svg>
-        </div>
-        <div class="sheet-hero-fade"></div>
-      </div>
 
-      <div class="sheet-info-head">
-        <div class="sheet-title">
-          <div class="sheet-zh" id="ssName">—</div>
-          <div class="sheet-latin" id="ssLatin">—</div>
+        <div class="sheet-info-head">
+          <div class="sheet-title">
+            <div class="sheet-zh" id="ssName">—</div>
+            <div class="sheet-latin" id="ssLatin">—</div>
+          </div>
         </div>
-        <div class="sheet-close" onclick="closeSheet()">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M6 6l12 12M18 6L6 18"/></svg>
-        </div>
-      </div>
 
-      <div class="sheet-body" style="padding-top:16px;">
-        <div class="sheet-tags" id="ssTags"></div>
-        <div class="sheet-cap" id="ssCap">觀察特徵</div>
-        <div class="sheet-desc" id="ssDesc">—</div>
-        <div class="sheet-source" id="ssSource"></div>
+        <div class="sheet-body-pad">
+          <div class="sheet-tags" id="ssTags"></div>
+          <div class="sheet-cap" id="ssCap">觀察特徵</div>
+          <div class="sheet-desc" id="ssDesc">—</div>
+        </div>
       </div>
     </div>
   </div>
@@ -6144,12 +6204,6 @@ body{
     <div class="item" data-tab="tasks" onclick="switchTab('tasks')">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 20 L9 9 L13 15 L16 10 L21 20 Z"/></svg>
       <span>里山學堂</span>
-    </div>
-    <div class="item fab" data-tab="scanner" onclick="toggleScanner()">
-      <div class="fab-circle">
-        <svg class="fab-svg-scan" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M3 7V5a2 2 0 012-2h2M21 7V5a2 2 0 00-2-2h-2M3 17v2a2 2 0 002 2h2M21 17v2a2 2 0 01-2 2h-2M7 12h10"/></svg>
-        <svg class="fab-svg-close" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg>
-      </div>
     </div>
     <div class="item" data-tab="trail" onclick="switchTab('trail')">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M9 4l-5 16h6l2-7 3 5 5-14h-6l-2 5z"/></svg>
@@ -6178,9 +6232,8 @@ tick();setInterval(tick,30000);
   const el = document.getElementById('greetDate');
   if(!el) return;
   const d = new Date();
-  const months = ['一','二','三','四','五','六','七','八','九','十','十一','十二'];
   const days = ['日','一','二','三','四','五','六'];
-  el.textContent = `${months[d.getMonth()]}月 ${d.getDate()} 日・週${days[d.getDay()]}`;
+  el.textContent = `${d.getMonth()+1} 月 ${d.getDate()} 日・週${days[d.getDay()]}`;
   // Also update greeting based on hour
   const hi = document.querySelector('.greet-hi');
   if(hi){
@@ -6189,8 +6242,28 @@ tick();setInterval(tick,30000);
     if(h>=11 && h<14) g='午安';
     else if(h>=14 && h<18) g='午安';
     else if(h>=18) g='晚安';
-    hi.textContent = `${g}，修業生`;
+    hi.textContent = `${g}，繼續探索`;
   }
+})();
+
+// === 龍潭四季環教教案 carousel ordering ===
+// Show all 8 lesson cards (4 seasons × 2) with the CURRENT season's two
+// cards first, followed by the remaining seasons in cyclic order.
+// e.g. in summer: summer ×2 → autumn ×2 → winter ×2 → spring ×2.
+(function orderSeasonCarousel(){
+  const wrap = document.getElementById('hCarousel');
+  if(!wrap) return;
+  const m = new Date().getMonth() + 1; // 1-12
+  let cur = 'winter';                  // Dec–Feb
+  if(m >= 3 && m <= 5) cur = 'spring';
+  else if(m >= 6 && m <= 8) cur = 'summer';
+  else if(m >= 9 && m <= 11) cur = 'autumn';
+  const cycle = ['spring','summer','autumn','winter'];
+  const start = cycle.indexOf(cur);
+  const order = cycle.slice(start).concat(cycle.slice(0, start));
+  order.forEach(season => {
+    wrap.querySelectorAll('[data-season="' + season + '"]').forEach(c => wrap.appendChild(c));
+  });
 })();
 
 // === Species data (descriptions strictly from Excel) ===
@@ -6318,10 +6391,6 @@ function openSpecies(zhName){
     document.getElementById('ssDesc').innerHTML = `本物種收錄於 <b>${sp.source}</b>。觀察特徵與完整描述請參考步道告示牌資訊。`;
   }
 
-  document.getElementById('ssSource').innerHTML =
-    `<b>資料來源</b>　${sp.source}<br>` +
-    `<b>調查單位</b>　李老師團隊・TNFD 框架普查`;
-
   document.getElementById('speciesSheet').classList.add('show');
 }
 function closeSheet(){
@@ -6438,24 +6507,21 @@ const PAGE_OWNER = {
   'trail-animal': 'trail',
   'trail-plant': 'trail',
   'trail-conserv': 'trail',
-  // singletons
-  scanner: 'scanner',
 };
 
 const tabRoots = {
   home: 'home',
   tasks: 'tasks',
   trail: 'trail',
-  scanner: 'scanner',
   seasons: 'seasons'
 };
 
 // === Stack-based navigation per tab ===
-const tabStacks = {home:['home'], tasks:['tasks'], trail:['trail'], scanner:['scanner'], seasons:['seasons']};
+const tabStacks = {home:['home'], tasks:['tasks'], trail:['trail'], seasons:['seasons']};
 let currentTab = 'home';
 
 // Status-bar color depends on whether the screen leads with a dark hero
-const heroIsDark = id => /^(esg|trail-intro|trail-nature|trail-animal|trail-plant|trail-conserv|season-|spring-|summer-|autumn-|winter-|me|scanner|task-soil|task-bio|task-edu|tasks|trail|seasons)$/.test(id);
+const heroIsDark = id => /^(esg|trail-intro|trail-nature|trail-animal|trail-plant|trail-conserv|season-|spring-|summer-|autumn-|winter-|me|task-soil|task-bio|task-edu|tasks|trail|seasons)$/.test(id);
 
 function updateStatusBar(id){
   const sb = document.getElementById('statusBar');
@@ -6652,27 +6718,16 @@ function closeAllModals(){
 }
 
 // Push a sub-screen onto current tab's stack
-// Tracks the most recent "scanner → board page" jump. When set, tapping back
-// on that exact page returns to scanner instead of the trail tab. Cleared as
-// soon as the user navigates anywhere else.
-let scannerJumpTarget = null;
-
-// Wrapper used by the 4 scanner-page board buttons. Records the jump target
-// before delegating to go(), so back() can detect this origin.
-function goFromScanner(id){
-  scannerJumpTarget = id;
-  go(id);
-}
-
 function go(id){
   closeAllModals();
-  // If a scanner-jump is pending but user is navigating to a different page,
-  // they're exploring further — invalidate the scanner-return behavior.
-  if(scannerJumpTarget && id !== scannerJumpTarget) scannerJumpTarget = null;
   // Auto-switch to the tab this page belongs to, so bottom tab indicator stays correct
   const owner = PAGE_OWNER[id] || currentTab;
   if(owner !== currentTab){
+    // Entering a different tab's theme is a context switch: reset that
+    // tab's stack to its root so back() never replays a stale click-path
+    // left over from an earlier visit.
     currentTab = owner;
+    tabStacks[owner] = [tabRoots[owner]];
   }
   const stack = tabStacks[currentTab];
   if(stack[stack.length-1] !== id) stack.push(id);
@@ -6683,56 +6738,19 @@ function go(id){
 // Switch top-level tab. Tapping ANY bottom tab-bar item always returns that
 // tab to its first-level (root) screen — regardless of whether it's the
 // current tab or a different one, and regardless of where the user last left
-// it. The optional `keepPosition` flag restores the tab's last screen instead;
-// it is used only by internal callers that must preserve the user's place
-// (scanner-FAB close-return and the back-button fall-through to home).
-function switchTab(tab, keepPosition){
+// it. Switching tabs is a context switch, so per-tab history does not carry
+// across tab switches.
+function switchTab(tab){
   closeAllModals();
-  // Tapping a tab is an explicit navigation; any pending scanner-jump is no
-  // longer relevant.
-  scannerJumpTarget = null;
   currentTab = tab;
-  if(keepPosition){
-    const stack = tabStacks[tab];
-    const top = stack[stack.length-1] || tabRoots[tab];
-    showScreen(top);
-  } else {
-    tabStacks[tab] = [tabRoots[tab]];
-    showScreen(tabRoots[tab]);
-  }
-}
-
-// Scanner FAB toggle: tapping the FAB opens scanner; tapping again while
-// scanner is open closes it and returns the user to whichever tab they
-// came from. Visually the FAB icon switches between scan icon ↔ X.
-let scannerReturnTab = 'home';
-function toggleScanner(){
-  if(currentTab === 'scanner'){
-    // Close: return to the tab the user was on before opening scanner,
-    // restoring their previous position (scanner is not a tab-bar tab tap).
-    switchTab(scannerReturnTab || 'home', true);
-  } else {
-    // Open: remember where we came from, then switch to scanner
-    scannerReturnTab = currentTab;
-    switchTab('scanner');
-  }
+  tabStacks[tab] = [tabRoots[tab]];
+  showScreen(tabRoots[tab]);
 }
 
 // Back within current tab
 function back(){
   closeAllModals();
   const stack = tabStacks[currentTab];
-  const cur = stack[stack.length-1];
-  // Special case: if the user reached this exact page by tapping a board
-  // button on the scanner (and hasn't navigated elsewhere since), back
-  // should return them to the scanner rather than fall through to the
-  // owning tab's normal back stack.
-  if(scannerJumpTarget && cur === scannerJumpTarget){
-    scannerJumpTarget = null;
-    if(stack.length > 1) stack.pop(); // also drop it from the trail stack
-    switchTab('scanner');
-    return;
-  }
   if(stack.length>1){
     stack.pop();
     const prev = stack[stack.length-1];
@@ -6744,9 +6762,11 @@ function back(){
     }
     updateStatusBar(prev);
   } else {
-    // Back from a tab root falls through to home, restoring home's last
-    // position (this is the back button, not a tab-bar tap).
-    switchTab('home', true);
+    // Back from a tab's root screen exits that tab's theme entirely and
+    // returns to the home ROOT screen — not to wherever the user last was
+    // inside the home tab. Once the user has switched to a different tab
+    // theme, the old click-path no longer applies.
+    switchTab('home');
   }
 }
 
@@ -6759,6 +6779,107 @@ function setTab(group, idx){
     p.classList.toggle('active', i===idx);
   });
 }
+
+// === Swipe-to-switch for 動物生態 / 植物生態 tab panes ===
+// Tap-to-filter on the tab buttons is preserved as-is; this additionally
+// lets a horizontal swipe on the pane area move to the previous/next
+// filter (swipe left → next, swipe right → previous, clamped at both ends).
+function initTabSwipe(group){
+  const panes = document.querySelectorAll('[data-pane-group="'+group+'"]');
+  if(!panes.length) return;
+  const container = panes[0].parentElement;
+  let x0 = null, y0 = null, tracking = false;
+  const start = (x, y, target) => {
+    // Ignore gestures that begin on the tab row itself — it has its own
+    // horizontal scrolling and must not be hijacked.
+    if(target.closest('.tabs')){ tracking = false; return; }
+    x0 = x; y0 = y; tracking = true;
+  };
+  const end = (x, y) => {
+    if(!tracking) return;
+    tracking = false;
+    const dx = x - x0, dy = y - y0;
+    // Require a clearly horizontal gesture so vertical scrolling is untouched
+    if(Math.abs(dx) < 48 || Math.abs(dx) <= Math.abs(dy) * 1.2) return;
+    let idx = 0;
+    panes.forEach((p,i)=>{ if(p.classList.contains('active')) idx = i; });
+    const next = dx < 0 ? idx + 1 : idx - 1;
+    if(next < 0 || next >= panes.length) return; // clamp, no wrap-around
+    setTab(group, next);
+    // Keep the newly active tab button visible in the scrollable tab row
+    document.querySelectorAll('[data-tab-group="'+group+'"]')[next]
+      ?.scrollIntoView({behavior:'smooth', block:'nearest', inline:'center'});
+  };
+  // Touch (mobile)
+  container.addEventListener('touchstart', e=>start(e.touches[0].clientX, e.touches[0].clientY, e.target), {passive:true});
+  container.addEventListener('touchend', e=>end(e.changedTouches[0].clientX, e.changedTouches[0].clientY));
+  // Mouse drag (desktop preview)
+  container.addEventListener('mousedown', e=>start(e.clientX, e.clientY, e.target));
+  container.addEventListener('mouseup', e=>end(e.clientX, e.clientY));
+}
+initTabSwipe('animals');
+initTabSwipe('plants');
+
+// === Mock data: 四季教案完成狀態（demo prototype） ===
+// State lives ONLY in this in-memory Set — no localStorage / cookies —
+// so reloading the page restores the default status below. This is the
+// simplest reliable reset for a demo.
+const SEASON_LESSONS = ['spring-tung','spring-firefly','summer-tea','summer-mongoose',
+                        'autumn-grass','autumn-bat','winter-radish','winter-pangolin'];
+// Badge circle colors when earned (themed per lesson)
+const BADGE_COLORS = {
+  'spring-tung':    'linear-gradient(135deg,#e8a5a5,#c97878)',
+  'spring-firefly': 'linear-gradient(135deg,#e0c66a,#b89b3e)',
+  'summer-tea':     'linear-gradient(135deg,#8fb36a,#5a8a55)',
+  'summer-mongoose':'linear-gradient(135deg,#5a7d54,#3d5b3a)',
+  'autumn-grass':   'linear-gradient(135deg,#c89058,#a26a3a)',
+  'autumn-bat':     'linear-gradient(135deg,#7a6555,#4a3a2a)',
+  'winter-radish':  'linear-gradient(135deg,#7fa8bc,#5a8a9e)',
+  'winter-pangolin':'linear-gradient(135deg,#9b7a5a,#5e4a32)'
+};
+// Default status: matches the 修業徽章 section (桐花、食蟹獴 earned = 2/8 = 25%)
+const seasonDone = new Set(['spring-tung','summer-mongoose']);
+
+function renderSeasonProgress(){
+  const total = SEASON_LESSONS.length;
+  const done = seasonDone.size;
+  // 我的/修業進度・四季教案 card
+  const num = document.getElementById('seasonPcNum');
+  const fill = document.getElementById('seasonPcFill');
+  const cap = document.getElementById('seasonPcCap');
+  if(num) num.textContent = '已完成' + done + '個';
+  if(fill) fill.style.width = Math.round(done / total * 100) + '%';
+  if(cap) cap.textContent = done >= total
+    ? '全數完成・里山四季修業圓滿'
+    : '尚餘' + (total - done) + '個・繼續深入里山四季的生態故事';
+  // 我的・頂部統計「完成教案」
+  const stat = document.getElementById('meSeasonDoneNum');
+  if(stat) stat.textContent = done;
+  // 四季教案・修業徽章
+  document.querySelectorAll('.badge[data-lesson]').forEach(b=>{
+    const earned = seasonDone.has(b.dataset.lesson);
+    b.classList.toggle('earned', earned);
+    const c = b.querySelector('.bd-circle');
+    if(c) c.style.background = earned ? (BADGE_COLORS[b.dataset.lesson] || '') : '';
+  });
+  // 「標記已完成」buttons on each lesson page
+  document.querySelectorAll('.action-btn[data-lesson]').forEach(btn=>{
+    const done = seasonDone.has(btn.dataset.lesson);
+    btn.classList.toggle('done', done);
+    // Button markup is <svg/> + text node: swap only the label text,
+    // keeping the checked icon in both states.
+    btn.lastChild.textContent = done ? '已完成' : '標記已完成';
+    // Once completed the button is disabled (not clickable); visual unchanged.
+    btn.style.pointerEvents = done ? 'none' : '';
+  });
+}
+function markLessonDone(id){
+  if(seasonDone.has(id)) return; // already completed → no-op (button disabled)
+  seasonDone.add(id);
+  renderSeasonProgress();
+  toast('已標記為完成 ✓');
+}
+renderSeasonProgress();
 
 // === Catalog filtering ===
 let catFilter = 'all';
